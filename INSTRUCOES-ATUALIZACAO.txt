@@ -1,0 +1,27 @@
+CALCULADORA ROLLERCOIN - ATUALIZAÇÃO MANUAL SEGURA
+
+COMO PUBLICAR
+1. Substitua no GitHub todos os arquivos antigos pelos arquivos deste pacote.
+2. Preserve as pastas data, fonts e images.
+3. Aguarde a publicação do GitHub Pages e atualize a página com Ctrl+F5.
+
+COMO CARREGAR OS DADOS DE UMA LIGA
+1. Escolha a liga na calculadora.
+2. Clique em "Abrir dados de [nome da liga]".
+3. Se necessário, entre na sua conta do RollerCoin.
+4. Copie todo o JSON exibido.
+5. Volte à calculadora, cole no campo e clique em "Importar dados".
+
+Os dados são guardados somente no navegador usado para fazer a importação.
+A calculadora remove o campo user_power antes de armazenar os dados.
+
+Para atualizar novamente uma liga, clique em "Atualizar dados da liga".
+Cada liga precisa ser importada separadamente porque a API atual exige login.
+
+ALTERAÇÕES DESTA VERSÃO
+- 22 ligas atuais, de Bronze I até Legend.
+- Remoção das chamadas para network-info-by-day, que deixou de existir.
+- Uso dos campos atuais total_block_power, block_payout e last_block_duration.
+- Limite de duas novas tentativas quando algum serviço falha.
+- A tela de carregamento é liberada após 15 segundos mesmo se outro serviço falhar.
+- Validação do JSON antes da importação.

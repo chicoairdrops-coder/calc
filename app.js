@@ -18,6 +18,12 @@ app.controller('MiningController', ['$scope', 'CurrencyService', 'UserMinerServi
     }, 2000);
     $scope.formData = default_form;
     $scope.isLoading = true;
+    $timeout(function() {
+        if ($scope.isLoading) {
+            $scope.isLoading = false;
+            $scope.loadWarning = 'Alguns serviços demoraram para responder. A página foi liberada mesmo assim.';
+        }
+    }, 15000);
     $scope.orderByField = 'block_value_in_usd';
     $scope.orderByFarmField = 'user_alocated_power_month_profit_in_usd';
     $scope.orderByMinersField = 'power';
@@ -25,7 +31,7 @@ app.controller('MiningController', ['$scope', 'CurrencyService', 'UserMinerServi
     $scope.reverseRacksSort = true;
     $scope.reverseMinersSort = true;
     $scope.reverseSort = true;
-    const exchangeRates = await CurrencyService.getCurrenciesPrices();
+    const exchangeRates = await CurrencyService.getCurrenciesPrices().catch(function() { return {}; });
     $scope.exchangeRates = exchangeRates;
 
     const filterFn = function(currency) {
@@ -196,7 +202,7 @@ app.controller('MiningController', ['$scope', 'CurrencyService', 'UserMinerServi
     let loaded_miners = getUrlParamValue('miners');
 
     function calculateDonation() {
-        if(!isNaN($scope.donationValue) && $scope.donationCurrency) {
+        if(!isNaN($scope.donationValue) && $scope.donationCurrency && exchangeRates?.BNB && exchangeRates?.MATIC && exchangeRates?.ETH) {
             const currency = $scope.donationCurrency === 'U$' ? 'usd' : 'brl';
             $scope.donationInBnb = ($scope.donationValue / exchangeRates['BNB'][currency])
             $scope.donationInMatic = ($scope.donationValue / exchangeRates['MATIC'][currency])
@@ -372,7 +378,8 @@ app.controller('MiningController', ['$scope', 'CurrencyService', 'UserMinerServi
     }
 
     const exchangeCoin = (value, coin, currency) => {
-        return parseFloat((value * exchangeRates[coin][currency]).toFixed(2));
+        const rate = exchangeRates?.[coin]?.[currency];
+        return Number.isFinite(rate) ? parseFloat((value * rate).toFixed(2)) : 0;
     };
 
     const getPercentualPower = function (alocated_power) {
@@ -398,7 +405,7 @@ app.controller('MiningController', ['$scope', 'CurrencyService', 'UserMinerServi
         }
     });
 
-    $scope.recentUsers = await FirebaseService.listUsers();
+    $scope.recentUsers = await FirebaseService.listUsers().catch(function() { return []; });
 
     $scope.getMinersByName = async function(name) {
         return await MinerService.getMinersByName(name);
@@ -554,7 +561,7 @@ app.controller('MiningController', ['$scope', 'CurrencyService', 'UserMinerServi
         });
     }
 
-    $scope.dailyBonus = await FirebaseService.getBonusTask();
+    $scope.dailyBonus = await FirebaseService.getBonusTask().catch(function() { return { task: [] }; });
     
 
     $scope.loadUserInventory = async function(inventory) {
@@ -883,7 +890,16 @@ app.controller('MiningController', ['$scope', 'CurrencyService', 'UserMinerServi
     $scope.loaded_league = loaded_league || $scope.leagues[0].id;
     $scope.formData.league = $scope.leagues.filter(l => l.id == $scope.loaded_league)[0] ?? $scope.leagues[0];
     $scope.loaded_league = $scope.leagues.filter(l => l.id == $scope.loaded_league)[0].id ?? $scope.leagues[0].id;
-    $scope.currencies = await CurrencyService.getDetailedCurrenciesByLeague($scope.loaded_league);
+    $scope.networkApiUrl = `https://rollercoin.com/api/league/user-power-distribution-info?league_id=${$scope.loaded_league}`;
+    $scope.networkDataMissing = !CurrencyService.hasManualNetworkData($scope.loaded_league);
+    $scope.showNetworkImport = $scope.networkDataMissing;
+    try {
+        $scope.currencies = await CurrencyService.getDetailedCurrenciesByLeague($scope.loaded_league);
+    } catch (error) {
+        console.error('Não foi possível carregar as moedas:', error);
+        $scope.currencies = [];
+        $scope.networkLoadError = 'Não foi possível carregar a configuração das moedas. Tente novamente mais tarde.';
+    }
     $scope.currencies?.forEach(c => {
         c.block_value_in_brl = c.in_game_only ? 0 : exchangeCoin(c.blockSize, c.name, 'brl');
         c.block_value_in_usd = c.in_game_only ? 0 : exchangeCoin(c.blockSize, c.name, 'usd');
@@ -954,6 +970,22 @@ app.controller('MiningController', ['$scope', 'CurrencyService', 'UserMinerServi
         let  new_url = window.location.pathname+"?league=" + selectedLeague.id;
         window.location.href = new_url;
     }
+
+    $scope.importNetworkData = function() {
+        $scope.networkImportMessage = '';
+        $scope.networkImportError = '';
+        try {
+            const count = CurrencyService.importManualNetworkData($scope.loaded_league, $scope.networkJsonText);
+            $scope.networkImportMessage = `${count} moedas importadas. Recarregando a calculadora...`;
+            $timeout(function() { window.location.reload(); }, 700);
+        } catch (error) {
+            $scope.networkImportError = error.message || 'Não foi possível importar os dados.';
+        }
+    };
+
+    $scope.openNetworkImport = function() {
+        $scope.showNetworkImport = true;
+    };
 
     $scope.updateCurrencyDetails = function() {
         const selectedCurrency = $scope.formData.currency;

@@ -159,6 +159,23 @@
         .invalid {
             border-color: red;
         }
+        .network-import-panel {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #f0ad4e;
+            border-radius: 6px;
+            margin: 10px 0 18px;
+            padding: 15px;
+        }
+        .network-import-panel textarea {
+            min-height: 130px;
+            resize: vertical;
+            width: 100%;
+        }
+        .network-import-panel .step {
+            margin-bottom: 8px;
+        }
+        .network-import-panel .success-message { color: #287d28; font-weight: bold; }
+        .network-import-panel .error-message { color: #b00020; font-weight: bold; }
         .wrong-value {
             color:red;
         }
@@ -265,6 +282,8 @@
     </header>
     
     <div class="container">
+        <div class="alert alert-warning" ng-if="loadWarning">{{loadWarning}}</div>
+        <div class="alert alert-danger" ng-if="networkLoadError">{{networkLoadError}}</div>
         <div class="row">
             <div class="col-md-8 col-xs-offset-2">
                 <table class="table table-bordered">
@@ -307,6 +326,17 @@
                         <select id="currency" class="form-control" ng-disabled="isLoadedUser" ng-model="formData.league" ng-options="league.name for league in leagues" ng-change="updateLeagueDetails()">
                             <option value="">Selecione uma liga</option>
                         </select>
+                    </div>
+                    <button type="button" class="btn btn-warning" ng-if="!showNetworkImport" ng-click="openNetworkImport()">Atualizar dados da liga</button>
+                    <div class="network-import-panel" ng-if="showNetworkImport">
+                        <h4>Atualizar dados desta liga</h4>
+                        <p class="step"><strong>1.</strong> Entre no RollerCoin e abra o endereço abaixo:</p>
+                        <p><a ng-href="{{networkApiUrl}}" target="_blank" rel="noopener">Abrir dados de {{formData.league.name}}</a></p>
+                        <p class="step"><strong>2.</strong> Copie todo o JSON exibido e cole aqui:</p>
+                        <textarea class="form-control" ng-model="networkJsonText" placeholder='Cole o texto que começa com {"success":true...'></textarea>
+                        <button type="button" class="btn btn-primary" ng-disabled="!networkJsonText" ng-click="importNetworkData()">Importar dados</button>
+                        <p class="success-message" ng-if="networkImportMessage">{{networkImportMessage}}</p>
+                        <p class="error-message" ng-if="networkImportError">{{networkImportError}}</p>
                     </div>
                     <div class="form-group">
                         <label for="currency">Moeda a Minerar</label>

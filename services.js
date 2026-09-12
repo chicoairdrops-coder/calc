@@ -1,7 +1,7 @@
 const service_app = angular.module('miningApp');
 
 service_app.factory('retryInterceptor', function($q, $injector, $timeout) {
-    const retryLimit = 15;
+    const retryLimit = 2;
     const retryDelay = 1000;
 
     return {
@@ -123,70 +123,84 @@ service_app.service('CurrencyService', ['$http', '$q', 'FirebaseService', functi
         }
     };
 
+    const leagues = [
+        { id: "6a846d84d4be9e1aa9a15591", name: "Bronze I" },
+        { id: "6a846d84d4be9e1aa9a15592", name: "Bronze II" },
+        { id: "6a846d84d4be9e1aa9a15593", name: "Bronze III" },
+        { id: "6a846d84d4be9e1aa9a15594", name: "Silver I" },
+        { id: "6a846d84d4be9e1aa9a15595", name: "Silver II" },
+        { id: "6a846d84d4be9e1aa9a15596", name: "Silver III" },
+        { id: "6a846d84d4be9e1aa9a15597", name: "Gold I" },
+        { id: "6a846d84d4be9e1aa9a15598", name: "Gold II" },
+        { id: "6a846d84d4be9e1aa9a15599", name: "Gold III" },
+        { id: "6a846d84d4be9e1aa9a1559a", name: "Platinum I" },
+        { id: "6a846d84d4be9e1aa9a1559b", name: "Platinum II" },
+        { id: "6a846d84d4be9e1aa9a1559c", name: "Platinum III" },
+        { id: "6a846d84d4be9e1aa9a1559d", name: "Diamond I" },
+        { id: "6a846d84d4be9e1aa9a1559e", name: "Diamond II" },
+        { id: "6a846d84d4be9e1aa9a1559f", name: "Diamond III" },
+        { id: "6a846d84d4be9e1aa9a155a0", name: "Titan I" },
+        { id: "6a846d84d4be9e1aa9a155a1", name: "Titan II" },
+        { id: "6a846d84d4be9e1aa9a155a2", name: "Titan III" },
+        { id: "6a846d84d4be9e1aa9a155a3", name: "Emerald I" },
+        { id: "6a846d84d4be9e1aa9a155a4", name: "Emerald II" },
+        { id: "6a846d84d4be9e1aa9a155a5", name: "Emerald III" },
+        { id: "6a846d84d4be9e1aa9a155a6", name: "Legend" }
+    ];
+
     this.getLeagues = function() {
-        return [
-            {
-                "id": "68af01ce48490927df92d687",
-                "name": "Bronze I" 
-            },
-            {
-                "id": "68af01ce48490927df92d686",
-                "name": "Bronze II" 
-            },
-            {
-                "id": "68af01ce48490927df92d685",
-                "name": "Bronze III" 
-            },
-            {
-                "id": "68af01ce48490927df92d684",
-                "name": "Silver I" 
-            },
-            {
-                "id": "68af01ce48490927df92d683",
-                "name": "Silver II" 
-            },
-            {
-                "id": "68af01ce48490927df92d682",
-                "name": "Silver III" 
-            },
-            {
-                "id": "68af01ce48490927df92d681",
-                "name": "Gold I" 
-            },
-            {
-                "id": "68af01ce48490927df92d680",
-                "name": "Gold II" 
-            },
-            {
-                "id": "68af01ce48490927df92d67f",
-                "name": "Gold III" 
-            },
-            {
-                "id": "68af01ce48490927df92d67e",
-                "name": "Platinum I" 
-            },
-            {
-                "id": "68af01ce48490927df92d67d",
-                "name": "Platinum II" 
-            },
-            {
-                "id": "68af01ce48490927df92d67c",
-                "name": "Platinum III" 
-            },
-            {
-                "id": "68af01ce48490927df92d67b",
-                "name": "Diamond I" 
-            },
-            {
-                "id": "68af01ce48490927df92d67a",
-                "name": "Diamond II" 
-            },
-            {
-                "id": "68af01ce48490927df92d679",
-                "name": "Diamond III" 
-            }
-        ];
-    }
+        return leagues;
+    };
+
+    const manualNetworkKey = leagueId => `rc_manual_network_${leagueId}`;
+
+    this.hasManualNetworkData = function(leagueId) {
+        return Boolean(localStorage.getItem(manualNetworkKey(leagueId)));
+    };
+
+    this.importManualNetworkData = function(leagueId, text) {
+        let result;
+        try {
+            result = typeof text === 'string' ? JSON.parse(text) : text;
+        } catch (_) {
+            throw new Error('O texto não é um JSON válido.');
+        }
+
+        const distribution = result?.data?.power_distribution;
+        if (result?.success !== true || !Array.isArray(distribution) || !distribution.length) {
+            throw new Error('Este JSON não contém data.power_distribution.');
+        }
+
+        const cleanDistribution = distribution.map(item => ({
+            currency: item.currency,
+            total_block_power: Number(item.total_block_power),
+            block_payout: Number(item.block_payout),
+            last_block_duration: Number(item.last_block_duration),
+            block_created: item.block_created,
+            is_in_game_currency: Boolean(item.is_in_game_currency)
+        }));
+
+        if (cleanDistribution.some(item => !item.currency || !Number.isFinite(item.total_block_power) ||
+            !Number.isFinite(item.block_payout) || !Number.isFinite(item.last_block_duration))) {
+            throw new Error('O JSON possui valores de rede inválidos.');
+        }
+
+        localStorage.setItem(manualNetworkKey(leagueId), JSON.stringify({
+            imported_at: new Date().toISOString(),
+            power_distribution: cleanDistribution
+        }));
+        localStorage.removeItem(`rc_network_data_${leagueId}`);
+        localStorage.removeItem(`rc_network_data_${leagueId}_exp`);
+        return cleanDistribution.length;
+    };
+
+    this.getManualNetworkInfo = function(leagueId) {
+        try {
+            return JSON.parse(localStorage.getItem(manualNetworkKey(leagueId)) || 'null');
+        } catch (_) {
+            return null;
+        }
+    };
 
     
     var getCurrenciesPrices = async function() {
@@ -257,66 +271,6 @@ service_app.service('CurrencyService', ['$http', '$q', 'FirebaseService', functi
         });
     };
 
-    var getBlockSizeByCurrency = async function(currency) {
-        const search = `https://rollercoin.com/api/mining/network-info-by-day?from=${current_date}&to=${current_date}&currency=${currency}&groupBy=block_reward`;
-        return $http.get(`https://wminer-calculator-proxy.chicohs.workers.dev/?${encodeURIComponent(search)}`).then(response => {
-            if (response.status === 200) { 
-                const result = response.data;
-                return result.data[0]?.value ?? 0;
-            }
-        });
-    };
-
-    var getBlockSizeByCurrencyAndLeague = async function(currency, leagueId) {
-        const search = `https://rollercoin.com/api/league/network-info-by-day?from=${current_date}&to=${current_date}&currency=${currency}&groupBy=block_reward&leagueId=${leagueId}`;
-        return $http.get(`https://wminer-calculator-proxy.chicohs.workers.dev/?${encodeURIComponent(search)}`).then(response => {
-            if (response.status === 200) { 
-                const result = response.data;
-                return result.data[0]?.value ?? 0;
-            }
-        });
-    };
-
-    var getNetworkPowerByCurrency = async function(currency) {
-        const search = `https://rollercoin.com/api/mining/network-info-by-day?from=${current_date}&to=${current_date}&currency=${currency}&groupBy=total_power`;
-        return $http.get(`https://wminer-calculator-proxy.chicohs.workers.dev/?${encodeURIComponent(search)}`).then(response => {
-            if (response.status === 200) { 
-                const result = response.data;
-                return result.data[0]?.value ?? 0;
-            }
-        });
-    };
-
-    var getNetworkPowerByCurrencyAndLeague = async function(currency, leagueId) {
-        const search = `https://rollercoin.com/api/league/network-info-by-day?from=${current_date}&to=${current_date}&currency=${currency}&groupBy=total_power&leagueId=${leagueId}`;
-        return $http.get(`https://wminer-calculator-proxy.chicohs.workers.dev/?${encodeURIComponent(search)}`).then(response => {
-            if (response.status === 200) { 
-                const result = response.data;
-                return result.data[0]?.value ?? 0;
-            }
-        });
-    }; 
-
-    var getBlockTimeByCurrency = async function(currency) {
-        const search = `https://rollercoin.com/api/mining/network-info-by-day?from=${current_date}&to=${current_date}&currency=${currency}&groupBy=duration`;
-        return $http.get(`https://wminer-calculator-proxy.chicohs.workers.dev/?${encodeURIComponent(search)}`).then(response => {
-            if (response.status === 200) { 
-                const result = response.data;
-                return result.data[0]?.value ?? 0;
-            }
-        });
-    };
-
-    var getBlockTimeByCurrencyAndLeague = async function(currency, leagueId) {
-        const search = `https://rollercoin.com/api/league/network-info-by-day?from=${current_date}&to=${current_date}&currency=${currency}&groupBy=duration&leagueId=${leagueId}`;
-        return $http.get(`https://wminer-calculator-proxy.chicohs.workers.dev/?${encodeURIComponent(search)}`).then(response => {
-            if (response.status === 200) { 
-                const result = response.data;
-                return result.data[0]?.value ?? 0;
-            }
-        });
-    };
-    
     this.getCurrencies = getCurrencies;
     this.getCurrenciesPrices = getCurrenciesPrices;
 
@@ -325,35 +279,20 @@ service_app.service('CurrencyService', ['$http', '$q', 'FirebaseService', functi
         var cached = getCache(cache_key);
         if(cached) return cached;
         const currencies = await getCurrencies();
-        const detailedCurrencies = [];
-        for (const currency of currencies) {
-            var blockSize = await getBlockSizeByCurrencyAndLeague(currency.balance_key, league);
-            var networkPower = await getNetworkPowerByCurrencyAndLeague(currency.balance_key, league);
-            var blockTime = await getBlockTimeByCurrencyAndLeague(currency.balance_key, league);
-            currency.blockSize = (blockSize/currency.divider) / currency.to_small;
-            currency.networkPower = networkPower;
-            currency.blockTime = blockTime;
-            currency.networkUnit = 'GH/s';
-            detailedCurrencies.push(currency);
+        const manualData = this.getManualNetworkInfo(league);
+        if (!manualData?.power_distribution?.length) {
+            return [];
         }
-        setCache(detailedCurrencies, cache_key);
-        FirebaseService.persistNetworkPower(detailedCurrencies);
-        return detailedCurrencies;
-    };
-
-    this.getDetailedCurrencies = async function() {
-        const cache_key = 'rc_network_data';
-        var cached = getCache(cache_key);
-        if(cached) return cached;
-        const currencies = await getCurrencies();
         const detailedCurrencies = [];
         for (const currency of currencies) {
-            var blockSize = await getBlockSizeByCurrencyAndLeague(currency.balance_key, '68af01ce48490927df92d67b');
-            var networkPower = await getNetworkPowerByCurrencyAndLeague(currency.balance_key, '68af01ce48490927df92d67b');
-            var blockTime = await getBlockTimeByCurrencyAndLeague(currency.balance_key, '68af01ce48490927df92d67b');
-            currency.blockSize = (blockSize/currency.divider) / currency.to_small;
-            currency.networkPower = networkPower;
-            currency.blockTime = blockTime;
+            const expectedName = currency.name === 'BTC' ? 'SAT' : currency.name;
+            const network = manualData.power_distribution.find(item =>
+                item.currency === expectedName || item.currency === `${expectedName}_SMALL`
+            );
+            if (!network) continue;
+            currency.blockSize = (network.block_payout / currency.divider) / currency.to_small;
+            currency.networkPower = network.total_block_power;
+            currency.blockTime = network.last_block_duration;
             currency.networkUnit = 'GH/s';
             detailedCurrencies.push(currency);
         }
