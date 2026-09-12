@@ -333,8 +333,8 @@
                         <p class="step"><strong>1.</strong> Entre no RollerCoin e abra o endereço abaixo:</p>
                         <p><a ng-href="{{networkApiUrl}}" target="_blank" rel="noopener">Abrir dados de {{formData.league.name}}</a></p>
                         <p class="step"><strong>2.</strong> Copie todo o JSON exibido e cole aqui:</p>
-                        <textarea class="form-control" ng-model="networkJsonText" placeholder='Cole o texto que começa com {"success":true...'></textarea>
-                        <button type="button" class="btn btn-primary" ng-disabled="!networkJsonText" ng-click="importNetworkData()">Importar dados</button>
+                        <textarea class="form-control" ng-model="networkImport.jsonText" placeholder='Cole o texto que começa com {"success":true...'></textarea>
+                        <button type="button" class="btn btn-primary" ng-disabled="!networkImport.jsonText" ng-click="importNetworkData()">Importar dados</button>
                         <p class="success-message" ng-if="networkImportMessage">{{networkImportMessage}}</p>
                         <p class="error-message" ng-if="networkImportError">{{networkImportError}}</p>
                     </div>

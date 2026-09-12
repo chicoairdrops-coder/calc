@@ -17,6 +17,8 @@ app.controller('MiningController', ['$scope', 'CurrencyService', 'UserMinerServi
         document.getElementById('balao2').style.display = "block";
     }, 2000);
     $scope.formData = default_form;
+    // ng-if creates a child scope; keep pasted text on a shared object.
+    $scope.networkImport = { jsonText: '' };
     $scope.isLoading = true;
     $timeout(function() {
         if ($scope.isLoading) {
@@ -975,7 +977,7 @@ app.controller('MiningController', ['$scope', 'CurrencyService', 'UserMinerServi
         $scope.networkImportMessage = '';
         $scope.networkImportError = '';
         try {
-            const count = CurrencyService.importManualNetworkData($scope.loaded_league, $scope.networkJsonText);
+            const count = CurrencyService.importManualNetworkData($scope.loaded_league, $scope.networkImport.jsonText);
             $scope.networkImportMessage = `${count} moedas importadas. Recarregando a calculadora...`;
             $timeout(function() { window.location.reload(); }, 700);
         } catch (error) {

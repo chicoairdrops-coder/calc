@@ -25,3 +25,4 @@ ALTERAÇÕES DESTA VERSÃO
 - Limite de duas novas tentativas quando algum serviço falha.
 - A tela de carregamento é liberada após 15 segundos mesmo se outro serviço falhar.
 - Validação do JSON antes da importação.
+- Correção do campo de texto para que o botão importe exatamente o JSON colado.

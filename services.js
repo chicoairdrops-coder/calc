@@ -276,13 +276,13 @@ service_app.service('CurrencyService', ['$http', '$q', 'FirebaseService', functi
 
     this.getDetailedCurrenciesByLeague = async function(league) {
         const cache_key = `rc_network_data_${league}`;
-        var cached = getCache(cache_key);
-        if(cached) return cached;
-        const currencies = await getCurrencies();
         const manualData = this.getManualNetworkInfo(league);
         if (!manualData?.power_distribution?.length) {
             return [];
         }
+        var cached = getCache(cache_key);
+        if(cached) return cached;
+        const currencies = await getCurrencies();
         const detailedCurrencies = [];
         for (const currency of currencies) {
             const expectedName = currency.name === 'BTC' ? 'SAT' : currency.name;
