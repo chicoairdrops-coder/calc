@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="miningApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Rollercoin | Wminer</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-2.5.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.0/spark-md5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5"></script>
+    <script src="data/basic_miners.js"></script>
+    <script src="data/merge_miners.js"></script>
+    <script src="data/old/merge_miners.js"></script>
+    <script src="data/components.js"></script>
+    <script src="app.js"></script>
+    <script src="firebase-db-service.js"></script>
+    <script src="services.js"></script>
+    <script src="user-miner-service.js"></script>
+    <script src="miner-service.js"></script>
+    <style>
+
+        .balao {
+            position: fixed;
+            bottom: 10px; /* Define a distância do fundo da página */
+            right: 10px;  /* Define a distância do lado direito da página */
+            width: 500px; /* Defina uma largura adequada para o balão */
+            height: auto; /* Permita que a altura seja ajustada automaticamente conforme o conteúdo */
+            background-color: green;
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            text-align: center;
+            z-index: 999;
+        }
+
+        .balao p {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .balao a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 20px;
+        }
+        #balao2{
+            bottom: 100px;
+            width: 266px;
+            height: 96px;
+            background: url(../images/tap.png);
+        }
+
+        #balao2 p{
+            vertical-align: middle;
+            margin-top: 10px;
+            background-color: rgba(255, 255, 255, 0.6);
+            color: #000000;
+        }
+
+        .fechar {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            cursor: pointer;
+        }
+        #chart {
+            width: 30%;
+            height: 250px;
+            margin: 0 auto;
+            margin-top: 350px;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        .already-have-miner {
+            background-color: rgba(0,0,0,0.2);
+        }
+        .removed-have-miner {
+            background-color: rgba(252, 79, 79, 0.2);
+        }
+        .autocomplete-container {
+            padding: 20px;
+        }
+        body {
+            --font-family-sans-serif: pixelSC,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+            background: linear-gradient(90deg, rgba(255,25,147,0.55) 0%, rgba(2,199,251,0.73) 100%);
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            font-size:1.5em;
+            min-height: 100vh;
+            font-family: var(--font-family-sans-serif);
+        }
+        @font-face {
+            font-family: pixelSC;
+            src: url('fonts/PixelOperatorSC.ttf');
+            font-display: swap;
+        }
+        .container {
+            flex: 1;
+            margin-top: 20px;
+        }
+        .form-inline .form-group {
+            margin-right: 10px;
+        }
+        header, footer {
+            background-color: rgba(255, 255, 255, 0.5);
+            color: #000;
+            padding: 10px 0;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+        }
+        header h1, footer p {
+            margin: 0;
+            align-self: center;
+        }
+        .currency-icon {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 10px;
+        }
+        .table-bordered {
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+        .table-container {
+            text-align: center;
+        }
+        .form-control {
+            width: calc(100% - 20px);
+            display: inline-block;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            font-size: 24px;
+        }
+        .invalid {
+            border-color: red;
+        }
+        .wrong-value {
+            color:red;
+        }
+        .best-coin:not([disabled]) {
+            background-color: gold;
+            font-weight: bolder;
+            animation: pulse 2s infinite ease-in-out;
+        }
+        .best-coin[disabled] {
+            background-color: #d7d0a7;
+            font-weight: bolder;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        tbody.allocated-farm tr:first-child {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        #message {
+            font-size: 24px;
+            animation: slideUp 2s forwards;
+        }
+
+        @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(50px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal {
+    text-align: center;
+    display:block;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    max-width: 80%;
+    max-height: 80%;
+    overflow: auto;
+    margin-left: 10%;
+    margin-top: 5%;
+  }
+/* 
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  } */
+    </style>
+</head>
+<body ng-controller="MiningController">
+    <!--<div class="overlay" id="overlay">
+        <div class="modal">
+          <h2>Olá querido amigo!</h2>
+          <p>Essa ferramenta é feita com todo carinho e cuidado para você<br/>
+            se ela te ajuda ou ajudou, não hesite em contribuir com a carteia no rodapé da página</p>
+          <button id="closeButton" ng-click="closeModal()">Fechar</button>
+        </div>
+    </div>
+    <audio id="confettiSound">
+        <source src="confetti-sound.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>-->
+    <div class="loading-overlay" ng-show="isLoading">
+        <p>Carregando...Isso vai demorar um pouco!</p>
+    </div>
+    <header>
+        <img src="images/hamster.png" style="height:50px;width:50px;margin-right:15px;">
+        <h1>Calculadora Rollercoin | Wminer</h1>
+    </header>
+    
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 col-xs-offset-2">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center" colspan="2">
+                                Task bônus do dia {{dailyBonus.date}}
+                            </th>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
+                                Quest
+                            </th>
+                            <th style="text-align: center">
+                                Recompensas
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="task in dailyBonus.task">
+                            <td style="text-align: center">
+                                {{task.quest}}
+                            </td>
+                            <td style="text-align: center">
+                                <ul style="list-style: none;">
+                                    <li ng-repeat="reward in dailyBonus.task[0].rewards">{{ reward }}</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <form name="miningForm">
+                    <div class="form-group">
+                        <label for="currency">Liga</label>
+                        <select id="currency" class="form-control" ng-disabled="isLoadedUser" ng-model="formData.league" ng-options="league.name for league in leagues" ng-change="updateLeagueDetails()">
+                            <option value="">Selecione uma liga</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="currency">Moeda a Minerar</label>
+                        <select id="currency" class="form-control" ng-model="formData.currency" ng-options="currency.name for currency in currencies" ng-change="updateCurrencyDetails()">
+                            <option value="">Selecione uma moeda</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="networkPower">Poder da Rede</label>
+                        <div class="form-inline">
+                            <input type="number" id="networkPower" class="form-control" ng-model="formData.networkPower" disabled>
+                            <select id="networkUnit" class="form-control" ng-model="formData.networkUnit" disabled ng-change="updateNetworkPowerUnit('{{formData.networkUnit}}')">
+                                <option ng-repeat="unit in networkUnits">{{unit}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="power">Seu Poder</label>
+                        <div class="form-inline">
+                            <input type="text" id="power" ng-disabled="isLoadedUser" class="form-control" ng-model="formData.power">
+                            <select id="unit" class="form-control" ng-disabled="isLoadedUser" ng-model="formData.unit" ng-options="unit for unit in units" ng-change="updatePowerUnit('{{formData.unit}}')"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="blockSize">Tamanho do Bloco</label>
+                        <div class="form-inline">
+                            <input type="text" id="blockSize" class="form-control" ng-model="formData.blockSize" disabled>
+                            <input type="text" id="blockSizeCurrency" class="form-control" value="{{formData.currency.name}} por bloco" disabled>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="blockTime">Tempo do Bloco</label>
+                        <div class="form-inline">
+                            <input type="number" id="blockTime" class="form-control" ng-model="formData.blockTime" disabled>
+                            <select id="timeUnit" class="form-control" ng-model="formData.timeUnit" disabled ng-change="updateTimeUnit('{{formData.timeUnit}}')">
+                                <option value="seconds">Segundos</option>
+                                <option value="minutes">Minutos</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-inline">
+                            <button class="best-coin animated-button" ng-disabled="!formData.power || formData.currency" ng-click="calculateAllCoins()"><i class="fa-solid fa-coins"></i> Calcular melhor moeda</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-inline">
+                            <button class="best-coin animated-button" ng-disabled="!isLoadedUser" ng-click="bestBuys()"><i class="fas fa-shopping-cart"></i> Melhores aquisições</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="blockTime">Carregar jogador</label>
+                        <div class="form-inline">
+                            <input type="text" 
+                                class="form-control" 
+                                ng-model="userSearchText" 
+                                placeholder="Procurar por código..." 
+                                typeahead-wait-ms="1500"
+                                uib-typeahead="player as player.code for player in getPlayerByName($viewValue)"
+                                typeahead-no-results="playerSearchNoResults"
+                                typeahead-on-select="onSelectPlayer($item, $model, $label, $event)"
+                                typeahead-loading="loading">
+                            <div ng-show="playerSearchNoResults">
+                                <i class="glyphicon glyphicon-remove"></i> Jogador não encontrado! Lembre-se que deve ser digitado o código que vem após o /p/ no link do rollercoin
+                            </div>
+                            <button ng-if="isLoadedUser" ng-click="reloadWithoutUser()"><i class="fa fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div ng-if="isLoadedUser" class="form-group">
+                        <input type="checkbox" ng-model="keepUser" ng-change="updateKeepUser(keepUser)" name="keep_user"/>
+                        <label for="keep_user">Manter carregado</label>
+                    </div>
+                </form>
+            </div>
+            
+            <div ng-if="user_data" class="col-md-8 table-container">
+                <h3>Calculando ganhos para {{user_data.name}}</h3>
+                <fieldset>
+                    <div>
+                        <input type="checkbox" ng-model="formData.showMiners" name="show_miners"/>
+                        <label for="scales">Exibir miners</label>
+                        <input type="checkbox" ng-model="formData.showRacks" name="show_miners" />
+                        <label for="scales">Exibir racks</label>
+                        <input type="checkbox" ng-model="formData.showAllMiners" ng-change="filterAllMiners()" name="show_all_miners" />
+                        <label for="scales">Simular aquisições</label>
+                        <input type="checkbox" ng-model="formData.showUserStatistics" ng-change="showStatistics()" name="show_statistics" />
+                        <label for="scales">Mostrar estatísticas</label>
+                        <input type="checkbox" ng-model="formData.showInventory" name="show_inventory" />
+                        <label for="show_inventory">Carregar inventário</label>
+                    </div>
+                </fieldset>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center">
+                                Usuário
+                            </th>
+                            <th style="text-align: center">
+                                Avatar
+                            </th>
+                            <th style="text-align: center">
+                                Poder de jogos
+                            </th>
+                            <th style="text-align: center">
+                                Poder de miners
+                            </th>
+                            <th style="text-align: center">
+                                Poder de racks
+                            </th>
+                            <th style="text-align: center">
+                                Poder temporário
+                            </th>
+                            <th style="text-align: center">
+                                Total de poder de mineração
+                            </th>
+                            <th style="text-align: center">
+                                Bônus de coleção
+                            </th>
+                            <th style="text-align: center">
+                                Salas liberadas
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="text-align: center">
+                                {{user_data.name}}
+                            </td>
+                            <td style="text-align: center">
+                                <img src="https://avatars.rollercoin.com/static/avatars/thumbnails/48/{{user_data.avatar_id}}.png?v=1652150400524" style="width: 30px; height: 30px; border-radius: 50%; vertical-align: middle; margin-right: 8px;">
+                            </td>
+                            <td style="text-align: center">
+                                {{chooseBestHashRateUnit(user_data.powerData.games, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.powerData.games, 'GH/s').unit}}
+                            </td>
+                            <td ng-if="user_data.newPowerData && user_data.newPowerData.new_power > 0" style="text-align: center">
+                                <s>{{chooseBestHashRateUnit(user_data.powerData.miners, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.powerData.miners, 'GH/s').unit}}</s></br>
+                                {{chooseBestHashRateUnit(user_data.newPowerData.miners, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.newPowerData.miners, 'GH/s').unit}}<br>
+                                <i class="fa-solid fa-arrow-up"></i> {{chooseBestHashRateUnit(user_data.newPowerData.new_power, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.newPowerData.new_power, 'GH/s').unit}}<br>
+                            </td>
+                            <td ng-if="user_data.newPowerData && user_data.newPowerData.new_power < 0" style="text-align: center">
+                                <s>{{chooseBestHashRateUnit(user_data.powerData.miners, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.powerData.miners, 'GH/s').unit}}</s></br>
+                                {{chooseBestHashRateUnit(user_data.newPowerData.miners, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.newPowerData.miners, 'GH/s').unit}}<br>
+                                <i class="fa-solid fa-arrow-down"></i> {{chooseBestHashRateUnit(user_data.newPowerData.new_power, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.newPowerData.new_power, 'GH/s').unit}}<br>
+                            </td>
+                            <td ng-if="!user_data.newPowerData || !user_data.newPowerData.new_power" style="text-align: center">
+                                {{chooseBestHashRateUnit(user_data.powerData.miners, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.powerData.miners, 'GH/s').unit}}
+                            </td>
+                            <td style="text-align: center">
+                                {{chooseBestHashRateUnit(user_data.powerData.racks, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.powerData.racks, 'GH/s').unit}}
+                            </td>
+                            <td style="text-align: center">
+                                {{chooseBestHashRateUnit(user_data.powerData.temp, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.powerData.temp, 'GH/s').unit}}
+                            </td>
+                            <td ng-if="!user_data.newPowerData || !user_data.newPowerData.new_total" style="text-align: center">
+                                {{chooseBestHashRateUnit(user_data.powerData.total, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.powerData.total, 'GH/s').unit}}
+                            </td>
+                            <td ng-if="user_data.newPowerData && user_data.newPowerData.new_total > 0" style="text-align: center">
+                                <s>{{chooseBestHashRateUnit(user_data.powerData.total, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.powerData.total, 'GH/s').unit}}</s></br>
+                                {{chooseBestHashRateUnit(user_data.newPowerData.total, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.newPowerData.total, 'GH/s').unit}}<br>
+                                <i class="fa-solid fa-arrow-up"></i> {{chooseBestHashRateUnit(user_data.newPowerData.new_total, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.newPowerData.new_total, 'GH/s').unit}} ({{(user_data.newPowerData.new_total_percent.toFixed(2))}}%)
+                            </td>
+                            <td ng-if="user_data.newPowerData && user_data.newPowerData.new_total < 0" style="text-align: center">
+                                <s>{{chooseBestHashRateUnit(user_data.powerData.total, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.powerData.total, 'GH/s').unit}}</s></br>
+                                {{chooseBestHashRateUnit(user_data.newPowerData.total, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.newPowerData.total, 'GH/s').unit}}<br>
+                                <i class="fa-solid fa-arrow-down"></i> {{chooseBestHashRateUnit(user_data.newPowerData.new_total, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(user_data.newPowerData.new_total, 'GH/s').unit}} ({{(user_data.newPowerData.new_total_percent.toFixed(2))}}%)
+                            </td>
+                            <td ng-if="user_data.newPowerData && user_data.newPowerData.new_bonus_percent > 0" style="text-align: center">
+                                <s>{{(user_data.powerData.bonus_percent / 100)}}%</s></br>
+                                {{(user_data.newPowerData.bonus_percent / 100)}}%<br>
+                                <i class="fa-solid fa-arrow-up"></i> {{(user_data.newPowerData.new_bonus_percent / 100)}}%
+                            </td>
+                            <td ng-if="!user_data.newPowerData || !user_data.newPowerData.new_bonus_percent" style="text-align: center">
+                                {{(user_data.powerData.bonus_percent / 100)}}%
+                            </td>
+                            <td ng-if="user_data.newPowerData && user_data.newPowerData.new_bonus_percent < 0" style="text-align: center">
+                                <s>{{(user_data.powerData.bonus_percent / 100)}}%</s></br>
+                                {{(user_data.newPowerData.bonus_percent / 100)}}%<br>
+                                <i class="fa-solid fa-arrow-down"></i> {{(user_data.newPowerData.new_bonus_percent / 100)}}%
+                            </td>
+                            <td style="text-align: center">
+                                {{user_data.roomData.rooms.length}}/4 salas<br/>
+                                <span ng-class="{'wrong-value': user_data.occupied_racks_cells  > user_data.all_racks_cells}">{{user_data.occupied_racks_cells}}</span>/{{user_data.all_racks_cells}} células ocupadas<br/>
+                                {{user_data.all_racks}}/{{user_data.all_racks_space}} racks alocados
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div ng-if="formData.showRacks" class="col-md-8 table-container">
+                <h3>Racks de {{user_data.name}}</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center">
+                                <a href="#" ng-click="orderByRacksField='name'; reverseRacksSort = !reverseRacksSort">
+                                    Nome
+                                    <span ng-show="orderByRacksField == 'name'">
+                                        <span ng-show="!reverseRacksSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseRacksSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center">
+                                Imagem
+                            </th>
+                            <th style="text-align: center">
+                                <a href="#" ng-click="orderByRacksField='bonus'; reverseRacksSort = !reverseRacksSort">
+                                    Bônus
+                                    <span ng-show="orderByRacksField == 'bonus'">
+                                        <span ng-show="!reverseRacksSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseRacksSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center">
+                                <a href="#" ng-click="orderByRacksField='cells'; reverseRacksSort = !reverseRacksSort">
+                                    Células
+                                    <span ng-show="orderByRacksField == 'cells'">
+                                        <span ng-show="!reverseRacksSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseRacksSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="rack in user_data.roomData.racks | orderBy:orderByRacksField:reverseRacksSort">
+                            <td>
+                                <span ng-show="$first">
+                                    <i style="color:#b7b706" class="fa-solid fa-crown"></i>
+                                </span>
+                                {{rack.name}}
+                            </td>
+                            <td><img style="width:25%;height:25%" src="https://static.rollercoin.com/static/img/market/racks/{{rack.rack_id}}.png?v=1.0.3"/></td>
+                            <td>{{rack.bonus/100}}%</td>
+                            <td>{{rack.cells}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div ng-if="customMiners.length > 0" class="col-md-8 table-container">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th colspan="5" style="text-align: center">
+                                Miners adicionadas
+                            </th>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center">
+                                Nome
+                            </th>
+                            <th style="text-align: center">
+                                Level
+                            </th>
+                            <th style="text-align: center">
+                                Poder
+                            </th>
+                            <th style="text-align: center">
+                                Bônus
+                            </th>
+                            <th style="text-align: center">
+                                Ações
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="miner in customMiners track by $index">
+                            <td style="text-align: center">
+                                {{miner.name.en}}
+                            </td>
+                            <td style="text-align: center; position: relative;">
+                                <img ng-if="miner.level == 0" src='https://rollercoin.com/static/img/storage/rarity_icons/level_1.png?v=1.0.0' style='left: 40px;position: absolute;top: 25px;'/>
+                                <img ng-if="miner.type === 'old_merge'" src='https://rollercoin.com/static/images/level_star.4ff18517e5e8eed42060..png' style='left: 40px;position: absolute;top: 25px;'/>
+                                <img ng-if="miner.level > 0 && miner.type !== 'old_merge'" src='https://rollercoin.com/static/img/storage/rarity_icons/level_{{miner.level+1}}.png?v=1.0.0' style='left: 40px;position: absolute;top: 25px;'/>
+                                <img src='https://static.rollercoin.com/static/img/market/miners/{{miner.filename}}.gif?v=1707996476608' width="80px" height="auto"/>
+                                <div ng-if="!miner.is_can_be_sold_on_mp"
+                                    style="
+                                    height: 10px;
+                                    width: 100px;
+                                    background-color: red;
+                                    font-size: 0.6em;
+                                    font-weight: bold;
+                                    margin-left: 16%;
+                                    color: white;
+                                ">INEGOCIAVEL</div>
+                            </td>
+                            <td style="text-align: center">
+                                {{chooseBestHashRateUnit(miner.power, 'GH/s').value.toFixed(2)}}{{chooseBestHashRateUnit(miner.power, 'GH/s').unit}}
+                            </td>
+                            <td style="text-align: center">
+                                {{(miner.bonus_power / 100)}}%
+                            </td>
+                            <td style="text-align: center">
+                                <button style="min-width: 80px;margin: 4px;" ng-click="removeMinerFromSimulation(miner)">Remover!</button><br/>
+                                <button style="min-width: 80px;margin: 4px;" ng-click="openBuyLink(miner)">Comprar</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div ng-if="formData.showAllMiners" class="col-md-8 table-container">
+                <div class="form-group col-md-4">
+                    <label for="currency">Nome</label>
+                    <input type="text" class="form-control" ng-change="filterAllMiners(allMinerNameSearch, allMinersRarity, {min:allMinerMinBonusSearch, max:allMinerMaxBonusSearch}, allMinerNegotiableStatus, allMinerPosessionStatus, allMinerCollectionId, allMinerMinPowerSearch, allMinerMaxPowerSearch, allMinerCells, allMinerMinImpact)" ng-model="allMinerNameSearch" placeholder="Buscar miner...">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="currency">Raridade</label><br/>
+                    <select class="form-control" ng-model="allMinersRarity" ng-change="filterAllMiners(allMinerNameSearch, allMinersRarity, {min:allMinerMinBonusSearch, max:allMinerMaxBonusSearch}, allMinerNegotiableStatus, allMinerPosessionStatus, allMinerCollectionId, allMinerMinPowerSearch, allMinerMaxPowerSearch, allMinerCells, allMinerMinImpact)">
+                        <option value="all">Todas</option>
+                        <option value="common">Common</option>
+                        <option value="legacy">Legacy</option>
+                        <option value="uncommon">Uncommon</option>
+                        <option value="rare">Rare</option>
+                        <option value="epic">Epic</option>
+                        <option value="legendary">Legendary</option>
+                        <option value="unreal">Unreal</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4 ng-binding">
+                    <label for="currency">Bônus</label><br>
+                    De   
+                    <input class="form-control" ng-model="allMinerMinBonusSearch" type="text" style="width: 21%;" ng-change="filterAllMiners(allMinerNameSearch, allMinersRarity, {min:allMinerMinBonusSearch, max:allMinerMaxBonusSearch}, allMinerNegotiableStatus, allMinerPosessionStatus, allMinerCollectionId, allMinerMinPowerSearch, allMinerMaxPowerSearch, allMinerCells, allMinerMinImpact)">
+                    A  <input class="form-control" ng-model="allMinerMaxBonusSearch" type="text" style="width: 21%;" ng-change="filterAllMiners(allMinerNameSearch, allMinersRarity, {min:allMinerMinBonusSearch, max:allMinerMaxBonusSearch}, allMinerNegotiableStatus, allMinerPosessionStatus, allMinerCollectionId, allMinerMinPowerSearch, allMinerMaxPowerSearch, allMinerCells, allMinerMinImpact)">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="currency">Negociável</label><br/>
+                    <select class="form-control" ng-model="allMinerNegotiableStatus" ng-change="filterAllMiners(allMinerNameSearch, allMinersRarity, {min:allMinerMinBonusSearch, max:allMinerMaxBonusSearch}, allMinerNegotiableStatus, allMinerPosessionStatus, allMinerCollectionId, allMinerMinPowerSearch, allMinerMaxPowerSearch, allMinerCells, allMinerMinImpact)">
+                        <option value="all">Todas</option>
+                        <option value="inegotiable">Não negociáveis</option>
+                        <option value="negotiable">Negociáveis</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="currency">Tenho em sala</label><br/>
+                    <select class="form-control" ng-model="allMinerPosessionStatus" ng-change="filterAllMiners(allMinerNameSearch, allMinersRarity, {min:allMinerMinBonusSearch, max:allMinerMaxBonusSearch}, allMinerNegotiableStatus, allMinerPosessionStatus, allMinerCollectionId, allMinerMinPowerSearch, allMinerMaxPowerSearch, allMinerCells, allMinerMinImpact)">
+                        <option value="all">Todas</option>
+                        <option value="mine">Somente as minhas</option>
+                        <option value="not_mine">Somente novas</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="currency">Coleção</label><br/>
+                    <select class="form-control" ng-model="allMinerCollectionId" ng-change="filterAllMiners(allMinerNameSearch, allMinersRarity, {min:allMinerMinBonusSearch, max:allMinerMaxBonusSearch}, allMinerNegotiableStatus, allMinerPosessionStatus, allMinerCollectionId, allMinerMinPowerSearch, allMinerMaxPowerSearch, allMinerCells, allMinerMinImpact)">
+                        <option value="-1">Todas</option>
+                        <option ng-repeat="collection in collections" value="{{collection.id}}">{{collection.name}}</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="currency">Poder mínimo (GH/s)</label><br/>
+                    <input placeholder="1" class="form-control" ng-model="allMinerMinPowerSearch" type="text" ng-change="filterAllMiners(allMinerNameSearch, allMinersRarity, {min:allMinerMinBonusSearch, max:allMinerMaxBonusSearch}, allMinerNegotiableStatus, allMinerPosessionStatus, allMinerCollectionId, allMinerMinPowerSearch, allMinerMaxPowerSearch, allMinerCells, allMinerMinImpact)">
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="currency">Poder máximo (GH/s)</label><br/>
+                    <input placeholder="999999999999" class="form-control" ng-model="allMinerMaxPowerSearch" type="text" ng-change="filterAllMiners(allMinerNameSearch, allMinersRarity, {min:allMinerMinBonusSearch, max:allMinerMaxBonusSearch}, allMinerNegotiableStatus, allMinerPosessionStatus, allMinerCollectionId, allMinerMinPowerSearch, allMinerMaxPowerSearch, allMinerCells, allMinerMinImpact)">
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="currency">Células</label><br/>
+                    <select class="form-control" ng-model="allMinerCells" ng-change="filterAllMiners(allMinerNameSearch, allMinersRarity, {min:allMinerMinBonusSearch, max:allMinerMaxBonusSearch}, allMinerNegotiableStatus, allMinerPosessionStatus, allMinerCollectionId, allMinerMinPowerSearch, allMinerMaxPowerSearch, allMinerCells, allMinerMinImpact)">
+                        <option value="all">Todas</option>
+                        <option value="1">1 Slot</option>
+                        <option value="2">2 Slots</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="currency">Impacto mínimo (GH/s)</label><br/>
+                    <input placeholder="999999999999" class="form-control" ng-model="allMinerMinImpact" type="text" ng-change="filterAllMiners(allMinerNameSearch, allMinersRarity, {min:allMinerMinBonusSearch, max:allMinerMaxBonusSearch}, allMinerNegotiableStatus, allMinerPosessionStatus, allMinerCollectionId, allMinerMinPowerSearch, allMinerMaxPowerSearch, allMinerCells, allMinerMinImpact)">
+                </div>
+
+                <!--<div class="form-group col-md-4">
+                    <button ng-click="loadWorstMinerImpact()" style="margin-top:28px">Minhas piores máquinas</button>
+                    <p>{{lowestMinerName}}</p>
+                    <p>{{lowestImpactOneCellMiner}}</p>
+                </div> -->
+               
+                <div ng-if="formData.showAllMiners">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th colspan="8" style="text-align: center">
+                                    Miners encontradas: {{allMiners.length}}
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="text-align: center">
+                                    Nome
+                                </th>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByAllMinersField='recipe_cost'; reverseAllMinersSort = !reverseAllMinersSort  ; $event.preventDefault();">
+                                        Receita
+                                        <span ng-show="orderByAllMinersField == 'recipe_cost'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByAllMinersField='craft_cost_diff'; reverseAllMinersSort = !reverseAllMinersSort  ; $event.preventDefault();">
+                                        Desconto merge (%)
+                                        <span ng-show="orderByAllMinersField == 'craft_cost_diff'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByAllMinersField='supply'; reverseAllMinersSort = !reverseAllMinersSort  ; $event.preventDefault();">
+                                        Supply
+                                        <span ng-show="orderByAllMinersField == 'supply'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByAllMinersField='power'; reverseAllMinersSort = !reverseAllMinersSort  ; $event.preventDefault();">
+                                        Poder
+                                        <span ng-show="orderByAllMinersField == 'power'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByAllMinersField='bonus_power'; reverseAllMinersSort = !reverseAllMinersSort  ; $event.preventDefault();">
+                                        Bônus
+                                        <span ng-show="orderByAllMinersField == 'bonus_power'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByAllMinersField='includeImpactPower'; reverseAllMinersSort = !reverseAllMinersSort  ; $event.preventDefault();">
+                                        Impacto
+                                        <span ng-show="orderByAllMinersField == 'includeImpactPower'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    Ações
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="miner in allMiners | orderBy:orderByAllMinersField:reverseAllMinersSort | limitTo:  itemsPerPage : (currentPage - 1) * itemsPerPage"  
+                                ng-class="{ 'already-have-miner': miner.already_have }" >
+                                <td style="text-align: center; position: relative;">
+                                    {{miner.name.en}}<br/>
+                                    <img ng-if="miner.level == 0" src='https://rollercoin.com/static/img/storage/rarity_icons/level_1.png?v=1.0.0' style='left: 40px;position: absolute;top: 40px;'/>
+                                    <img ng-if="miner.type === 'old_merge'" src='https://rollercoin.com/static/images/level_star.4ff18517e5e8eed42060..png' style='left: 40px;position: absolute;top: 40px;'/>
+                                    <img ng-if="miner.level > 0 && miner.type !== 'old_merge'" src='https://rollercoin.com/static/img/storage/rarity_icons/level_{{miner.level+1}}.png?v=1.0.0' style='left: 40px;position: absolute;top: 40px;'/>
+                                    <img src='https://static.rollercoin.com/static/img/market/miners/{{miner.filename}}.gif?v=1707996476608' width="80px" height="auto"/>
+                                    <div ng-if="!miner.is_can_be_sold_on_mp"
+                                        style="
+                                        height: 10px;
+                                        width: 100px;
+                                        background-color: red;
+                                        font-size: 0.6em;
+                                        font-weight: bold;
+                                        margin-left: 8%;
+                                        color: white;
+                                    ">INEGOCIAVEL</div>
+                                </td>
+                                <td style="text-align: center">
+                                    <p ng-repeat="item in miner.craft_items">
+                                        <span ng-if="item.component_type === 'mutation_components'"><img width="20" height="20" src="https://static.rollercoin.com/static/img/storage/mutation_components/{{item._id}}.png?v=1.0.1"/> {{item.count}} <i style="font-size:10px;margin-left:2px" ng-click="openBuyCraftLink(item._id, 'mutation_component')" class="fas fa-external-link-alt"></i></span>
+                                        <span ng-if="item.component_type === 'miners'"><img width="20" height="20" src="https://rollercoin.com/static/images/basic_miner.39e37c9f62068115758b..svg"/> {{item.count}} <i style="font-size:10px;margin-left:2px" ng-click="openBuyCraftLink(item._id, 'miner')" class="fas fa-external-link-alt"></i></span>
+                                    </p>
+                                    <p>
+                                        {{miner.recipe_cost}} RLT
+                                    </p>
+                                    <p ng-repeat="item in miner.old_craft_items">
+                                        <span ng-if="item.component_type === 'mutation_components'"><img width="20" height="20" src="https://static.rollercoin.com/static/img/storage/mutation_components/{{item._id}}.png?v=1.0.1"/> <s>{{item.count}}</s> <i style="font-size:10px;margin-left:2px" ng-click="openBuyCraftLink(item._id, 'mutation_component')" class="fas fa-external-link-alt"></i></span>
+                                    </p>
+                                    <p>
+                                        <s>{{miner.old_recipe_cost}} RLT</s>
+                                    </p>
+                                </td>
+                                <td style="text-align: center">
+                                    {{miner.craft_cost_diff}}%
+                                </td>
+                                <td style="text-align: center">
+                                    {{miner.supply}}
+                                </td>
+                                <td style="text-align: center">
+                                    {{chooseBestHashRateUnit(miner.power, 'GH/s').value.toFixed(2)}}{{chooseBestHashRateUnit(miner.power, 'GH/s').unit}}
+                                </td>
+                                <td style="text-align: center">
+                                    {{(miner.bonus_power / 100)}}%
+                                </td>
+                                <td style="text-align: center">
+                                    {{miner.includeImpactLegend.value.toFixed(2)}} {{miner.includeImpactLegend.unit}}
+                                </td>
+                                <td style="text-align: center">
+                                    <button style="min-width: 80px;margin: 4px;" ng-click="addMinerToSimulation(miner)">Adicionar!</button><br/>
+                                    <button style="min-width: 80px;margin: 4px;" ng-click="openBuyLink(miner)">Comprar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <ul uib-pagination first-text="Primeira Pág." previous-text="Anterior" last-text="Última Pág." next-text="Próxima Pág." total-items="allMiners.length" ng-model="currentPage" max-size="5" class="pagination-sm" items-per-page="itemsPerPage" boundary-links="true" num-pages="numPages"></ul>
+                </div>
+            </div>
+
+            <div ng-if="formData.showInventory" class="col-md-8 table-container">
+                <div class="form-group col-md-12">
+                    <label>Carregar inventário</label>
+                    <p>1. Acesse <a href="https://rollercoin.com/storage/inventory" target="_blank">seu inventário</a></p>
+                    <p>2. Acesse o menu "Mineradores" e clique em ver mais, até que todos estejam visíveis</p>
+                    <p>3. Aperte CTRL A + CTRL C para copiar tudo ou toque e segure apertando selecionar tudo e copiar, caso esteja no celular</p>
+                    <p>4. Cole o conteúdo abaixo</p>
+                    <textarea class="form-control" ng-model="userInventoryPaste" ng-change="loadUserInventory(userInventoryPaste)" placeholder="Colar seu inventário..."></textarea>
+                </div>
+                <!--
+                <div class="form-group col-md-4">
+                    <label for="currency">Nome</label>
+                    <input type="text" class="form-control" ng-change="filteruserInventoryMiners(userMinerNameSearch, userInventoryMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)" ng-model="userMinerNameSearch" placeholder="Buscar miner...">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="currency">Raridade</label><br/>
+                    <select class="form-control" ng-model="userInventoryMinersRarity" ng-change="filteruserInventoryMiners(userMinerNameSearch, userInventoryMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                        <option value="all">Todas</option>
+                        <option value="common">Common</option>
+                        <option value="legacy">Legacy</option>
+                        <option value="uncommon">Uncommon</option>
+                        <option value="rare">Rare</option>
+                        <option value="epic">Epic</option>
+                        <option value="legendary">Legendary</option>
+                        <option value="unreal">Unreal</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4 ng-binding">
+                    <label for="currency">Bônus</label><br>
+                    De   
+                    <input class="form-control" ng-model="userMinerMinBonusSearch" type="text" style="width: 21%;" ng-change="filteruserInventoryMiners(userMinerNameSearch, userInventoryMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                    A  <input class="form-control" ng-model="userMinerMaxBonusSearch" type="text" style="width: 21%;" ng-change="filteruserInventoryMiners(userMinerNameSearch, userInventoryMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="currency">Negociável</label><br/>
+                    <select class="form-control" ng-model="userMinerNegotiableStatus" ng-change="filteruserInventoryMiners(userMinerNameSearch, userInventoryMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                        <option value="all">Todas</option>
+                        <option value="inegotiable">Não negociáveis</option>
+                        <option value="negotiable">Negociáveis</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="currency">Poder mínimo (GH/s)</label><br/>
+                    <input placeholder="1" class="form-control" ng-model="userMinerMinPowerSearch" type="text" ng-change="filteruserInventoryMiners(userMinerNameSearch, userInventoryMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="currency">Poder máximo (GH/s)</label><br/>
+                    <input placeholder="999999999999" class="form-control" ng-model="userMinerMaxPowerSearch" type="text" ng-change="filteruserInventoryMiners(userMinerNameSearch, userInventoryMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="currency">Células</label><br/>
+                    <select class="form-control" ng-model="userMinerCells" ng-change="filteruserInventoryMiners(userMinerNameSearch, userInventoryMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                        <option value="all">Todas</option>
+                        <option value="1">1 Slot</option>
+                        <option value="2">2 Slots</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="currency">Duplicadas</label><br/>
+                    <select class="form-control" ng-model="userMinerDuplicate" ng-change="filteruserInventoryMiners(userMinerNameSearch, userInventoryMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                        <option value="all">Todas</option>
+                        <option value="unique">Apenas únicas</option>
+                        <option value="dup">Apenas duplicadas</option>
+                        <option value="stairs">Escadinhas</option>
+                    </select>
+                </div>-->
+               
+                <div ng-if="formData.showInventory">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th colspan="6" style="text-align: center">
+                                    Miners encontradas: {{visible_user_inventory_miners.length}}
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByuserInventoryMinersField='filename'; reverseuserInventoryMinersSort = !reverseuserInventoryMinersSort ; $event.preventDefault();">
+                                        Nome
+                                        <span ng-show="orderByuserInventoryMinersField == 'filename'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByuserInventoryMinersField='power'; reverseuserInventoryMinersSort = !reverseuserInventoryMinersSort ; $event.preventDefault();">
+                                        Poder
+                                        <span ng-show="orderByuserInventoryMinersField == 'power'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByuserInventoryMinersField='bonus_power'; reverseuserInventoryMinersSort = !reverseuserInventoryMinersSort ; $event.preventDefault();">
+                                        Bônus
+                                        <span ng-show="orderByuserInventoryMinersField == 'bonus_power'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByuserInventoryMinersField='quantity'; reverseuserInventoryMinersSort = !reverseuserInventoryMinersSort ; $event.preventDefault();">
+                                        Quantidade
+                                        <span ng-show="orderByuserInventoryMinersField == 'quantity'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByuserInventoryMinersField='includeImpactPower'; reverseuserInventoryMinersSort = !reverseuserInventoryMinersSort ; $event.preventDefault();">
+                                        Impacto
+                                        <span ng-show="orderByuserInventoryMinersField == 'includeImpactPower'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    Ações
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="miner in visible_user_inventory_miners | orderBy:orderByuserInventoryMinersField:reverseuserInventoryMinersSort | limitTo:  userInventoryMinersItemsPerPage : (userInventoryMinersCurrentPage - 1) * userInventoryMinersItemsPerPage"
+                                ng-class="{ 'removed-have-miner': miner.removed }">
+                                <td style="text-align: center; position: relative;">
+                                    {{miner.name.en}}<br/>
+                                    <img ng-if="miner.level == 0" src='https://rollercoin.com/static/img/storage/rarity_icons/level_1.png?v=1.0.0' style='left: 40px;position: absolute;top: 40px;'/>
+                                    <img ng-if="miner.type === 'old_merge'" src='https://rollercoin.com/static/images/level_star.4ff18517e5e8eed42060..png' style='left: 40px;position: absolute;top: 40px;'/>
+                                    <img ng-if="miner.level > 0 && miner.type !== 'old_merge'" src='https://rollercoin.com/static/img/storage/rarity_icons/level_{{miner.level+1}}.png?v=1.0.0' style='left: 40px;position: absolute;top: 40px;'/>
+                                    <img src='https://static.rollercoin.com/static/img/market/miners/{{miner.filename}}.gif?v=1707996476608' width="80px" height="auto"/>
+                                    <div ng-if="!miner.is_can_be_sold_on_mp"
+                                        style="
+                                        height: 10px;
+                                        width: 100px;
+                                        background-color: red;
+                                        font-size: 0.6em;
+                                        font-weight: bold;
+                                        margin-left: 20%;
+                                        color: white;
+                                    ">INEGOCIAVEL</div>
+                                </td>
+                                <td style="text-align: center">
+                                    {{chooseBestHashRateUnit(miner.power, 'GH/s').value.toFixed(2)}}{{chooseBestHashRateUnit(miner.power, 'GH/s').unit}}
+                                </td>
+                                <td style="text-align: center">
+                                    {{(miner.bonus_power / 100)}}%
+                                </td>
+                                <td>
+                                    {{miner.quantity}}
+                                </td>
+                                <td>
+                                    {{miner.includeImpactLegend.value.toFixed(2)}} {{miner.includeImpactLegend.unit}}
+                                </td>
+                                <td style="text-align: center">
+                                    <button style="min-width: 80px;margin: 4px;" ng-click="openBuyLink(miner)">Comprar</button><br/>
+                                    <button style="min-width: 80px;margin: 4px;" ng-click="openSellLink(miner)">Vender</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <ul uib-pagination first-text="Primeira Pág." previous-text="Anterior" last-text="Última Pág." next-text="Próxima Pág." total-items="visible_user_miners.length" ng-model="userInventoryMinersCurrentPage" max-size="5" class="pagination-sm" items-per-page="userInventoryMinersItemsPerPage" boundary-links="true" num-pages="numPages2"></ul>
+                </div>
+            </div>
+
+            <div ng-if="formData.showMiners" class="col-md-8 table-container">
+                <div class="form-group col-md-4">
+                    <label for="currency">Nome</label>
+                    <input type="text" class="form-control" ng-change="filterUserMiners(userMinerNameSearch, userMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)" ng-model="userMinerNameSearch" placeholder="Buscar miner...">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="currency">Raridade</label><br/>
+                    <select class="form-control" ng-model="userMinersRarity" ng-change="filterUserMiners(userMinerNameSearch, userMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                        <option value="all">Todas</option>
+                        <option value="common">Common</option>
+                        <option value="legacy">Legacy</option>
+                        <option value="uncommon">Uncommon</option>
+                        <option value="rare">Rare</option>
+                        <option value="epic">Epic</option>
+                        <option value="legendary">Legendary</option>
+                        <option value="unreal">Unreal</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4 ng-binding">
+                    <label for="currency">Bônus</label><br>
+                    De   
+                    <input class="form-control" ng-model="userMinerMinBonusSearch" type="text" style="width: 21%;" ng-change="filterUserMiners(userMinerNameSearch, userMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                    A  <input class="form-control" ng-model="userMinerMaxBonusSearch" type="text" style="width: 21%;" ng-change="filterUserMiners(userMinerNameSearch, userMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="currency">Negociável</label><br/>
+                    <select class="form-control" ng-model="userMinerNegotiableStatus" ng-change="filterUserMiners(userMinerNameSearch, userMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                        <option value="all">Todas</option>
+                        <option value="inegotiable">Não negociáveis</option>
+                        <option value="negotiable">Negociáveis</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="currency">Poder mínimo (GH/s)</label><br/>
+                    <input placeholder="1" class="form-control" ng-model="userMinerMinPowerSearch" type="text" ng-change="filterUserMiners(userMinerNameSearch, userMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="currency">Poder máximo (GH/s)</label><br/>
+                    <input placeholder="999999999999" class="form-control" ng-model="userMinerMaxPowerSearch" type="text" ng-change="filterUserMiners(userMinerNameSearch, userMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="currency">Células</label><br/>
+                    <select class="form-control" ng-model="userMinerCells" ng-change="filterUserMiners(userMinerNameSearch, userMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                        <option value="all">Todas</option>
+                        <option value="1">1 Slot</option>
+                        <option value="2">2 Slots</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label for="currency">Duplicadas</label><br/>
+                    <select class="form-control" ng-model="userMinerDuplicate" ng-change="filterUserMiners(userMinerNameSearch, userMinersRarity, {min:userMinerMinBonusSearch, max:userMinerMaxBonusSearch}, userMinerNegotiableStatus, userMinerMinPowerSearch, userMinerMaxPowerSearch, userMinerCells, userMinerDuplicate)">
+                        <option value="all">Todas</option>
+                        <option value="unique">Apenas únicas</option>
+                        <option value="dup">Apenas duplicadas</option>
+                        <option value="stairs">Escadinhas</option>
+                    </select>
+                </div>
+               
+                <div ng-if="formData.showMiners">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th colspan="6" style="text-align: center">
+                                    Miners encontradas: {{visible_user_miners.length}}
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByuserMinersField='filename'; reverseuserMinersSort = !reverseuserMinersSort ; $event.preventDefault();">
+                                        Nome
+                                        <span ng-show="orderByuserMinersField == 'filename'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByuserMinersField='power'; reverseuserMinersSort = !reverseuserMinersSort ; $event.preventDefault();">
+                                        Poder
+                                        <span ng-show="orderByuserMinersField == 'power'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByuserMinersField='bonus_power'; reverseuserMinersSort = !reverseuserMinersSort ; $event.preventDefault();">
+                                        Bônus
+                                        <span ng-show="orderByuserMinersField == 'bonus_power'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    Local
+                                </th>
+                                <th style="text-align: center">
+                                    <a href="#" ng-click="orderByuserMinersField='removeImpactPower'; reverseuserMinersSort = !reverseuserMinersSort ; $event.preventDefault();">
+                                        Impacto
+                                        <span ng-show="orderByuserMinersField == 'removeImpactPower'">
+                                            <span ng-show="!reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-asc"></i>
+                                            </span>
+                                            <span ng-show="reverseMinersSort">
+                                                <i class="fa fa-fw fa-sort-desc"></i>
+                                            </span>
+                                        </span>
+                                    </a>
+                                </th>
+                                <th style="text-align: center">
+                                    Ações
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="miner in visible_user_miners | orderBy:orderByuserMinersField:reverseuserMinersSort | limitTo:  userMinersItemsPerPage : (userMinersCurrentPage - 1) * userMinersItemsPerPage"
+                                ng-class="{ 'removed-have-miner': miner.removed }">
+                                <td style="text-align: center; position: relative;">
+                                    {{miner.name.en}}<br/>
+                                    <img ng-if="miner.level == 0" src='https://rollercoin.com/static/img/storage/rarity_icons/level_1.png?v=1.0.0' style='left: 40px;position: absolute;top: 40px;'/>
+                                    <img ng-if="miner.type === 'old_merge'" src='https://rollercoin.com/static/images/level_star.4ff18517e5e8eed42060..png' style='left: 40px;position: absolute;top: 40px;'/>
+                                    <img ng-if="miner.level > 0 && miner.type !== 'old_merge'" src='https://rollercoin.com/static/img/storage/rarity_icons/level_{{miner.level+1}}.png?v=1.0.0' style='left: 40px;position: absolute;top: 40px;'/>
+                                    <img src='https://static.rollercoin.com/static/img/market/miners/{{miner.filename}}.gif?v=1707996476608' width="80px" height="auto"/>
+                                    <div ng-if="!miner.is_can_be_sold_on_mp"
+                                        style="
+                                        height: 10px;
+                                        width: 100px;
+                                        background-color: red;
+                                        font-size: 0.6em;
+                                        font-weight: bold;
+                                        margin-left: 20%;
+                                        color: white;
+                                    ">INEGOCIAVEL</div>
+                                </td>
+                                <td style="text-align: center">
+                                    {{chooseBestHashRateUnit(miner.power, 'GH/s').value.toFixed(2)}}{{chooseBestHashRateUnit(miner.power, 'GH/s').unit}}
+                                </td>
+                                <td style="text-align: center">
+                                    {{(miner.bonus_power / 100)}}%
+                                </td>
+                                <td>
+                                    <div ng-bind-html="getMinerLocation(miner)"> </div>
+                                </td>
+                                <td>
+                                    {{miner.removeImpactLegend.value.toFixed(2)}} {{miner.removeImpactLegend.unit}}
+                                </td>
+                                <td style="text-align: center">
+                                    <button style="min-width: 80px;margin: 4px;" ng-if="!miner.removed" ng-click="removeUserMinerSimulation(miner)">Remover!</button>
+                                    <button style="min-width: 80px;margin: 4px;" ng-if="miner.removed" ng-click="revertRemoveUserMinerSimulation(miner)">Desfazer remoção!</button><br/>
+                                    <button style="min-width: 80px;margin: 4px;" ng-click="openBuyLink(miner)">Comprar</button><br/>
+                                    <button style="min-width: 80px;margin: 4px;" ng-click="openSellLink(miner)">Vender</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <ul uib-pagination first-text="Primeira Pág." previous-text="Anterior" last-text="Última Pág." next-text="Próxima Pág." total-items="visible_user_miners.length" ng-model="userMinersCurrentPage" max-size="5" class="pagination-sm" items-per-page="userMinersItemsPerPage" boundary-links="true" num-pages="numPages2"></ul>
+                </div>
+            </div>
+
+            <div ng-if="formData.showUserStatistics">
+                <div id="chart"></div>
+            </div>
+
+            <div ng-if="formData.showAddMinerSimulation" class="col-md-8 table-container">
+                <div class="autocomplete-container">
+                    <input type="text" 
+                        class="form-control" 
+                        ng-model="searchText" 
+                        placeholder="Procurar miner..." 
+                        uib-typeahead="miner as miner.name.en for miner in getMinersByName($viewValue)"
+                        typeahead-no-results="noResults"
+                        typeahead-on-select="onSelect($item, $model, $label, $event)"
+                        typeahead-loading="loading">
+                </div>
+                <div ng-if="detailed_miners">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th colspan="5" style="text-align: center">
+                                    {{chosen_mine}}
+                                </th>
+                            </tr>
+                            <tr>
+                                <th style="text-align: center">
+                                    Level
+                                </th>
+                                <th style="text-align: center">
+                                    Supply
+                                </th>
+                                <th style="text-align: center">
+                                    Poder
+                                </th>
+                                <th style="text-align: center">
+                                    Bônus
+                                </th>
+                                <th style="text-align: center">
+                                    Ações
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="miner in detailed_miners">
+                                <td style="text-align: center; position: relative;">
+                                    <img ng-if="miner.level == 0" src='https://rollercoin.com/static/img/storage/rarity_icons/level_1.png?v=1.0.0' style='left: 65px;position: absolute;top: 25px;'/>
+                                    <img ng-if="miner.type === 'old_merge'" src='https://rollercoin.com/static/images/level_star.4ff18517e5e8eed42060..png' style='left: 65px;position: absolute;top: 25px;'/>
+                                    <img ng-if="miner.level > 0 && miner.type !== 'old_merge'" src='https://rollercoin.com/static/img/storage/rarity_icons/level_{{miner.level+1}}.png?v=1.0.0' style='left: 65px;position: absolute;top: 25px;'/>
+                                    <img src='https://static.rollercoin.com/static/img/market/miners/{{miner.filename}}.gif?v=1707996476608' width="80px" height="auto"/>
+                                    <div ng-if="!miner.is_can_be_sold_on_mp"
+                                        style="
+                                        height: 10px;
+                                        width: 100px;
+                                        background-color: red;
+                                        font-size: 0.6em;
+                                        font-weight: bold;
+                                        margin-left: 27%;
+                                        color: white;
+                                    ">INEGOCIAVEL</div>
+                                </td>
+                                <td style="text-align: center">
+                                    {{miner.supply}}
+                                </td>
+                                <td style="text-align: center">
+                                    {{chooseBestHashRateUnit(miner.power, 'GH/s').value.toFixed(2)}}{{chooseBestHashRateUnit(miner.power, 'GH/s').unit}}
+                                </td>
+                                <td style="text-align: center">
+                                    {{(miner.bonus_power / 100)}}%
+                                </td>
+                                <td style="text-align: center">
+                                    <button ng-click="addMinerToSimulation(miner)">Adicionar!</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-8 table-container">
+                <h3>Resultados</h3>
+                <table ng-if="formData.currency" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center" colspan="4">
+                                Cálculo de mineração em {{formData.currency.name}}
+                                <img style="width: 30px;height: 30px;margin: 5px;" ng-if="formData.currency" ng-src="{{formData.currency.image}}" alt="{{formData.currency.name}} logo" class="currency-icon">
+                            </th>
+                        </tr>
+                        <tr ng-hide="formData.currency.in_game_only">
+                            <th style="text-align: center" colspan="2">
+                                1 {{formData.currency.name}} = ${{exchangeRates[formData.currency.name]['usd']}}
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                1 {{formData.currency.name}} = R${{exchangeRates[formData.currency.name]['brl']}}
+                            </th>
+                        </tr>
+                        <tr>
+                            <th style="text-align:center;">Tempo</th>
+                            <th style="text-align:center;">Moeda</th>
+                            <th style="text-align:center;" ng-hide="formData.currency.in_game_only">Dólar</th>
+                            <th style="text-align:center;" ng-hide="formData.currency.in_game_only">Real</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Ganho por Bloco</td>
+                            <td>{{calculateEarnings('block', 'amount')}} {{formData.currency.name}}</td>
+                            <td ng-hide="formData.currency.in_game_only">${{calculateEarnings('block', 'usd')}}</td>
+                            <td ng-hide="formData.currency.in_game_only">R${{calculateEarnings('block', 'brl')}}</td>
+                        </tr>
+                        <tr>
+                            <td>Ganho Diário</td>
+                            <td>{{calculateEarnings('day', 'amount')}} {{formData.currency.name}}</td>
+                            <td ng-hide="formData.currency.in_game_only">${{calculateEarnings('day', 'usd')}}</td>
+                            <td ng-hide="formData.currency.in_game_only">R${{calculateEarnings('day', 'brl')}}</td>
+                        </tr>
+                        <tr>
+                            <td>Ganho Semanal</td>
+                            <td>{{calculateEarnings('week', 'amount')}} {{formData.currency.name}}</td>
+                            <td ng-hide="formData.currency.in_game_only">${{calculateEarnings('week', 'usd')}}</td>
+                            <td ng-hide="formData.currency.in_game_only">R${{calculateEarnings('week', 'brl')}}</td>
+                        </tr>
+                        <tr>
+                            <td>Ganho Mensal</td>
+                            <td>{{calculateEarnings('month', 'amount')}} {{formData.currency.name}}</td>
+                            <td ng-hide="formData.currency.in_game_only">${{calculateEarnings('month', 'usd')}}</td>
+                            <td ng-hide="formData.currency.in_game_only">R${{calculateEarnings('month', 'brl')}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <form name="myForm">
+                <table ng-if="!formData.currency" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center" colspan="19">
+                                Informações gerais
+                            </th>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center" rowspan="2" colspan="2">
+                                Moeda
+                            </th>
+                            <th style="text-align: center" rowspan="2" colspan="2">
+                                <a href="#" ng-click="orderByField='networkPower'; reverseSort = !reverseSort">
+                                    Poder da rede 
+                                    <span ng-show="orderByField == 'networkPower'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" rowspan="2" colspan="2">
+                                Tamanho do bloco
+                            </th>
+                            <th style="text-align: center" colspan="4">
+                                Valor por bloco
+                            </th>
+                            <th style="text-align: center" colspan="9">
+                                Meu Farm por bloco 
+                                <span title="Preencha seu poder para calcular o Farm">
+                                    <i style="color:rgb(83, 83, 243)" class="fa fa-info-circle"></i>
+                                </span>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByField='block_value_in_usd'; reverseSort = !reverseSort">
+                                    USD 
+                                    <span ng-show="orderByField == 'block_value_in_usd'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByField='block_value_in_brl'; reverseSort = !reverseSort">
+                                    BRL 
+                                    <span ng-show="orderByField == 'block_value_in_brl'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByField='user_block_farm_token'; reverseSort = !reverseSort">
+                                    CRIPTO 
+                                    <span ng-show="orderByField == 'user_block_farm_token'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByField='user_block_farm_brl'; reverseSort = !reverseSort">
+                                    BRL 
+                                    <span ng-show="orderByField == 'user_block_farm_brl'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByField='user_block_farm_usd'; reverseSort = !reverseSort">
+                                    USD 
+                                    <span ng-show="orderByField == 'user_block_farm_usd'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByField='user_days_to_widthdraw'; reverseSort = !reverseSort">
+                                    Saque mínimo 
+                                    <span ng-show="orderByField == 'user_days_to_widthdraw'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                <div ng-if="hasAnyAllocatedPower()">
+                                    <button ng-click="resetAlocatedPower()"><i class="fa fa-trash"></i></button><br/>
+                                </div>
+                                %
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                            <tr ng-repeat="currency in currencies | orderBy:orderByField:reverseSort">
+                                <td colspan="2">
+                                    <span ng-show="$first">
+                                        <i style="color:#b7b706" class="fa-solid fa-crown"></i>
+                                    </span>
+                                    {{currency.name}}
+                                </td>
+                                <td colspan="2">{{chooseBestHashRateUnit(currency.networkPower, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(currency.networkPower, 'GH/s').unit}}</td>
+                                <td colspan="2">{{currency.blockSize}} {{currency.name}} a cada {{currency.blockTime}} segundos</td>
+                                <td colspan="2">${{currency.block_value_in_usd}}</td>
+                                <td colspan="2">R${{currency.block_value_in_brl}}</td>
+                                <td colspan="2">{{currency.user_block_farm_token}} {{currency.name}}</td>
+                                <td colspan="2">R${{currency.user_block_farm_brl}}</td>
+                                <td colspan="2">${{currency.user_block_farm_usd}}</td>
+                                <td colspan="2">{{formatDays(currency.user_days_to_widthdraw)}}</td>
+                                <td colspan="2"><input type="text" ng-disabled="!formData.power" name="input{{$index}}" id="power" class="form-control" ng-model="currency.user_alocated_power" ng-change="updateAllocatedPower(currency)" style="width:45px"></td>
+                            </tr>
+                    </tbody>
+                </table>
+                </form>
+            </div>
+            <div class="col-md-8 table-container">
+                <table ng-if="!formData.currency && getCurrenciesSum('user_alocated_power')  > 0" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center" colspan="22">
+                                Minha mineração <span ng-class="{'wrong-value': getCurrenciesSum('user_alocated_power')  > 100}">{{getCurrenciesSum('user_alocated_power')}}</span>/100%
+                            </th>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center" rowspan="2" colspan="2">
+                                Moeda
+                            </th>
+                            <th style="text-align: center" rowspan="2" colspan="2">
+                                Poder alocado
+                            </th>
+                            <th style="text-align: center" colspan="6">
+                                Farm diário
+                            </th>
+                            <th style="text-align: center" colspan="6">
+                                Farm semanal
+                            </th>
+                            <th style="text-align: center" colspan="6">
+                                Farm mensal
+                            </th>
+                        </tr>
+                        <tr>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByFarmField='user_alocated_power_day_profit_in_usd'; reverseSort = !reverseSort; $event.preventDefault();">
+                                    USD
+                                    <span ng-show="orderByFarmField == 'user_alocated_power_day_profit_in_usd'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByFarmField='user_alocated_power_day_profit_in_brl'; reverseSort = !reverseSort; $event.preventDefault();">
+                                    BRL
+                                    <span ng-show="orderByFarmField == 'user_alocated_power_day_profit_in_brl'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByFarmField='user_alocated_power_day_profit_in_cripto'; reverseSort = !reverseSort; $event.preventDefault();">
+                                    CRIPTO
+                                    <span ng-show="orderByFarmField == 'user_alocated_power_day_profit_in_cripto'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByFarmField='user_alocated_power_week_profit_in_usd'; reverseSort = !reverseSort; $event.preventDefault();">
+                                    USD
+                                    <span ng-show="orderByFarmField == 'user_alocated_power_week_profit_in_usd'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByFarmField='user_alocated_power_week_profit_in_brl'; reverseSort = !reverseSort; $event.preventDefault();">
+                                    BRL
+                                    <span ng-show="orderByFarmField == 'user_alocated_power_week_profit_in_brl'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByFarmField='user_alocated_power_week_profit_in_cripto'; reverseSort = !reverseSort; $event.preventDefault();">
+                                    CRIPTO
+                                    <span ng-show="orderByFarmField == 'user_alocated_power_week_profit_in_cripto'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByFarmField='user_alocated_power_month_profit_in_usd'; reverseSort = !reverseSort; $event.preventDefault();">
+                                    USD
+                                    <span ng-show="orderByFarmField == 'user_alocated_power_month_profit_in_usd'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByFarmField='user_alocated_power_month_profit_in_brl'; reverseSort = !reverseSort; $event.preventDefault();">
+                                    BRL
+                                    <span ng-show="orderByFarmField == 'user_alocated_power_month_profit_in_brl'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                            <th style="text-align: center" colspan="2">
+                                <a href="#" ng-click="orderByFarmField='user_alocated_power_month_profit_in_cripto'; reverseSort = !reverseSort; $event.preventDefault();">
+                                    CRIPTO
+                                    <span ng-show="orderByFarmField == 'user_alocated_power_month_profit_in_cripto'">
+                                        <span ng-show="!reverseSort">
+                                            <i class="fa fa-fw fa-sort-asc"></i>
+                                        </span>
+                                        <span ng-show="reverseSort">
+                                            <i class="fa fa-fw fa-sort-desc"></i>
+                                        </span>
+                                    </span>
+                                </a>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="allocated-farm">
+                            <tr ng-repeat="currency in filteredCurrencies = (currencies | filter:filterFn | orderBy:orderByFarmField:reverseSort)">
+                                <td colspan="2">
+                                    <span ng-show="$first" id="bestCoinTable">
+                                        <i style="color:#b7b706" class="fa-solid fa-crown"></i>
+                                    </span>
+                                    {{currency.name}}
+                                </td>
+                                <td colspan="2">{{chooseBestHashRateUnit(currency.user_alocated_power_value, 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(currency.user_alocated_power_value, 'GH/s').unit}}</td>
+                                <td colspan="2">${{currency.user_alocated_power_day_profit_in_usd}}</td>
+                                <td colspan="2">R${{currency.user_alocated_power_day_profit_in_brl}}</td>
+                                <td colspan="2">{{currency.user_alocated_power_day_profit_in_cripto}} {{currency.name}}</td>
+                                <td colspan="2">${{currency.user_alocated_power_week_profit_in_usd}}</td>
+                                <td colspan="2">R${{currency.user_alocated_power_week_profit_in_brl}}</td>
+                                <td colspan="2">{{currency.user_alocated_power_week_profit_in_cripto}} {{currency.name}}</td>
+                                <td colspan="2">${{currency.user_alocated_power_month_profit_in_usd}}</td>
+                                <td colspan="2">R${{currency.user_alocated_power_month_profit_in_brl}}</td>
+                                <td colspan="2">{{currency.user_alocated_power_month_profit_in_cripto}} {{currency.name}}</td>
+                            </tr>
+                    </tbody>
+                    <tfoot ng-show="filteredCurrencies.length">
+                        <tr style="background-color:rgba(255,255,255,0.7)">
+                            <th scope="row" colspan="2">Total</th>
+                            <td colspan="2">{{chooseBestHashRateUnit(getCurrenciesSum('user_alocated_power_value'), 'GH/s').value.toFixed(2)}} {{chooseBestHashRateUnit(getCurrenciesSum('user_alocated_power_value'), 'GH/s').unit}}</td>
+                            <td colspan="2">U${{getCurrenciesSum('user_alocated_power_day_profit_in_usd').toFixed(2)}}</td>
+                            <td colspan="2">R${{getCurrenciesSum('user_alocated_power_day_profit_in_brl').toFixed(2)}}</td>
+                            <td colspan="2">-</td>
+                            <td colspan="2">U${{getCurrenciesSum('user_alocated_power_week_profit_in_usd').toFixed(2)}}</td>
+                            <td colspan="2">R${{getCurrenciesSum('user_alocated_power_week_profit_in_brl').toFixed(2)}}</td>
+                            <td colspan="2">-</td>
+                            <td colspan="2">U${{getCurrenciesSum('user_alocated_power_month_profit_in_usd').toFixed(2)}}</td>
+                            <td colspan="2">R${{getCurrenciesSum('user_alocated_power_month_profit_in_brl').toFixed(2)}}</td>
+                            <td colspan="2">-</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div style="text-align: center;">
+        <button ng-click="resetValues()">↻ Resetar valores</button>
+    </div>
+    <br/>
+    <br/>
+    <br/>
+
+    <div class="col-md-8 col-xs-offset-2 table-container">
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th colspan="3" style="text-align: center">
+                        Usuários consultados recentemente
+                    </th>
+                </tr>
+                <tr>
+                    <th style="text-align: center">
+                        Usuário
+                    </th>
+                    <th style="text-align: center">
+                        Consultado em
+                    </th>
+                    <th style="text-align: center">
+                        Total de consultas
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                    <tr ng-repeat="user in recentUsers">
+                        <td>{{user.name}}</td>
+                        <td>{{user.timeAgo}}</td>
+                        <td>{{user.searchCount}}</td>
+                    </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3">Ferramenta da comunidade para a comunidade ❤️</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+
+    <div style="
+    background-color: white;
+    width: 40%;
+    min-width:800px;
+    margin-left: 30%;
+    height: 100px;
+    display: flex;
+">
+        <img style="width: 14%;" src="images/dev-working.gif">
+<div style="
+    margin-top: 15px;
+    width: 130px;
+">Quer pagar um café para o desenvolvedor dessa calculadora?
+</div><div style="
+    margin-top: 35px;
+    margin-left: 40px;
+">
+<label>Valor</label>
+    <input type="text" ng-model="donationValue" 
+    ng-change="calculateDonation()"
+    style="
+    width: 60px;
+    align-content: right;
+"><select
+    ng-model="donationCurrency"
+    ng-change="calculateDonation()"
+     style="
+    margin-left: 4px;
+    align-content: right;
+    width: 50px;
+    height: 28px;
+"><option>U$</option><option>R$</option></select>
+
+</div>
+
+<div style="
+    margin-top: 35px;
+    margin-left: 40px;
+">
+    <button ng-click="donate('BSC')">Doar {{donationInBnb.toFixed(3)}} BNB</button>
+</div>
+<div style="
+    margin-top: 35px;
+    margin-left: 40px;
+">
+    <button ng-click="donate('POLYGON')">Doar {{donationInMatic.toFixed(3)}} Matic</button>
+</div>
+
+    </div>
+
+    </div>
+
+    <p style="text-align: center;">Você também pode doar diretamente em: <b>0x57721770F5Ea06B79ECe6996D653BAC413667Fa2</b></p>
+    <footer>
+        <p>&copy; 2024 Calculadora de Mineração Wminer. Desenvolvida pela e para a comunidade.</p>
+    </footer>
+
+    <div id="balao2" class="balao">
+        <span class="fechar" onclick="document.getElementById('balao2').style.display = 'none';">X</span>
+        <p>A calculadora da comunidade continua atualizada! Que tal doar um cafézinho?</p></a>
+    </div>
+</body>
+</html>
